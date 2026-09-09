@@ -3,35 +3,44 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import AppShell from '../../components/AppShell';
 import ProductRow from '../../components/ProductRow';
-import HistoryRow from '../../components/HistoryRow';
 import ProductModal from '../../components/ProductModal';
 import { useData } from '../../lib/DataProvider';
 import { useAuth } from '../../lib/AuthProvider';
 import { statusOf } from '../../lib/helpers';
 import { supabase } from '../../lib/supabaseClient';
 
-export default function DashboardPage() {
+export default function StockPage() {
   return (
     <AppShell>
-      <DashboardContent />
+      <StockContent />
     </AppShell>
   );
 }
 
-function DashboardContent() {
-  const { categories, products, movements, loadingData, refreshAll } = useData();
+function StockContent() {
+  const { categories, products, loadingData } = useData();
   const { profile } = useAuth();
   const router = useRouter();
+  const [search, setSearch] = useState('');
+  const [catFilter, setCatFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [openProductId, setOpenProductId] = useState(null);
 
-  if (loadingData) return <div className="center-msg">Chargement des données…</div>;
+  if (loadingData) return <div className="center-msg">Chargement…</div>;
 
-  const active = products.filter((p) => p.active !== false);
-  const toOrder = active.filter((p) => statusOf(p).key === 'commander');
-  const low = active.filter((p) => statusOf(p).key === 'faible');
-  const today = new Date().toISOString().slice(0, 10);
-  const todaysMv = movements.filter((m) => m.created_at.slice(0, 10) === today);
   const catById = (id) => categories.find((c) => c.id === id);
+  const q = search.trim().toLowerCase();
+  const list = products.filter((p) => {
+    if (p.active === false) return false;
+    if (catFilter !== 'all' && p.category_id !== catFilter) return false;
+    if (statusFilter !== 'all' && statusOf(p).key !== statusFilter) return false;
+    if (q) {
+      const cat = catById(p.category_id);
+      const hay = (p.ref + ' ' + p.name + ' ' + (cat ? cat.name : '') + ' ' + (p.location || '')).toLowerCase();
+      if (hay.indexOf(q) === -1) return false;
+    }
+    return true;
+  });
   const openProduct = products.find((p) => p.id === openProductId);
 
   async function toggleActive(p) {
@@ -41,35 +50,30 @@ function DashboardContent() {
 
   return (
     <>
-      <div className="stats-row">
-        <div className="stat-card"><div className="num">{active.length}</div><div className="lbl">📦 Produits</div></div>
-        <div className="stat-card danger"><div className="num">{toOrder.length}</div><div className="lbl">🔴 À commander</div></div>
-        <div className="stat-card warn"><div className="num">{low.length}</div><div className="lbl">🟠 Stocks faibles</div></div>
-        <div className="stat-card accent"><div className="num">{todaysMv.length}</div><div className="lbl">📊 Mouvements du jour</div></div>
+      <div className="search-wrap">
+        <span className="ic">🔎</span>
+        <input type="text" placeholder="Rechercher une référence, un produit, un emplacement…" value={search} onChange={(e) => setSearch(e.target.value)} />
       </div>
-
-      <button className="btn btn-accent btn-lg btn-block" style={{ marginTop: 18 }} onClick={() => router.push('/sortie')}>➖ Sortie de stock</button>
-
-      {toOrder.length > 0 && (
-        <>
-          <div className="section-title">⚠️ À commander</div>
-          <div className="list">
-            {toOrder.slice(0, 6).map((p) => (
-              <ProductRow key={p.id} product={p} category={catById(p.category_id)} onClick={() => setOpenProductId(p.id)} />
-            ))}
-          </div>
-        </>
-      )}
-
-      <div className="section-title">📋 Derniers mouvements</div>
-      {movements.length === 0 ? (
-        <div className="empty"><div className="ic">📭</div>Aucun mouvement pour l&apos;instant.</div>
+      <div className="chips">
+        <div className={'chip' + (catFilter === 'all' ? ' active' : '')} onClick={() => setCatFilter('all')}>Toutes familles</div>
+        {categories.map((c) => (
+          <div key={c.id} className={'chip' + (catFilter === c.id ? ' active' : '')} onClick={() => setCatFilter(c.id)}>{c.icon} {c.name}</div>
+        ))}
+      </div>
+      <div className="chips">
+        {[['all', 'Tous statuts'], ['ok', '🟢 OK'], ['faible', '🟠 Faible'], ['commander', '🔴 À commander']].map(([k, l]) => (
+          <div key={k} className={'chip' + (statusFilter === k ? ' active' : '')} onClick={() => setStatusFilter(k)}>{l}</div>
+        ))}
+      </div>
+      {list.length === 0 ? (
+        <div className="empty"><div className="ic">📦</div>Aucun produit ne correspond.</div>
       ) : (
         <div className="list">
-          {movements.slice(0, 6).map((m) => <HistoryRow key={m.id} m={m} />)}
+          {list.map((p) => (
+            <ProductRow key={p.id} product={p} category={catById(p.category_id)} onClick={() => setOpenProductId(p.id)} />
+          ))}
         </div>
       )}
-
       {openProduct && (
         <ProductModal
           product={openProduct}
