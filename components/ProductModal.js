@@ -21,6 +21,8 @@ export default function ProductModal({ product, category, isResponsable, onClose
           <StatBlock label="Seuil sécurité" val={product.stock_secu} />
           <StatBlock label="Stock maximum" val={product.stock_max} />
           <StatBlock label="À commander" val={qtyToOrder(product) + ' ' + product.unit} />
+          {product.supplier ? <StatBlock label="Fournisseur" val={product.supplier} /> : null}
+          {(product.price !== null && product.price !== undefined) ? <StatBlock label="Prix d'achat" val={Number(product.price).toFixed(2) + ' €'} /> : null}
         </div>
         <div className="qr-big-wrap"><img src={qrImageUrl(product.id)} alt="QR code" /></div>
         <div className="btn-row" style={{ marginBottom: 10 }}>
