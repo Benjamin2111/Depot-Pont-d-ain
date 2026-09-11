@@ -15,7 +15,7 @@ export default function EtatStockPage() {
 
 function escapeCsv(v) {
   const s = String(v === undefined || v === null ? '' : v);
-  if (s.includes(';') || s.includes('"') || s.includes('\n')) {
+  if (s.includes(',') || s.includes('"') || s.includes('\n')) {
     return '"' + s.replace(/"/g, '""') + '"';
   }
   return s;
@@ -56,7 +56,7 @@ function EtatStockContent() {
     });
     rows.push([]);
     rows.push(['', '', '', '', '', '', 'TOTAL GÉNÉRAL', grandTotal.toFixed(2)]);
-    const csv = rows.map((r) => r.map(escapeCsv).join(';')).join('\n');
+    const csv = rows.map((r) => r.map(escapeCsv).join(',')).join('\n');
     const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
