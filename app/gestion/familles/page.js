@@ -5,7 +5,7 @@ import AppShell from '../../../components/AppShell';
 import { useData } from '../../../lib/DataProvider';
 import { useAuth } from '../../../lib/AuthProvider';
 import { supabase } from '../../../lib/supabaseClient';
-import { statusOf } from '../../../lib/helpers';
+import { statusOf, stockValue, formatEuro } from '../../../lib/helpers';
 
 export default function GestionFamillesPage() {
   return (
@@ -63,6 +63,8 @@ function GestionFamillesContent() {
           const prods = products.filter((p) => p.category_id === c.id && p.active !== false);
           const toOrder = prods.filter((p) => statusOf(p).key === 'commander').length;
           const low = prods.filter((p) => statusOf(p).key === 'faible').length;
+          const value = prods.reduce((sum, p) => { const v = stockValue(p); return v !== null ? sum + v : sum; }, 0);
+          const hasValue = prods.some((p) => stockValue(p) !== null);
           return (
             <div key={c.id} className="prow status-ok" onClick={() => router.push('/stock')}>
               <div className="fam-icon">{c.icon}</div>
@@ -70,6 +72,7 @@ function GestionFamillesContent() {
                 <div className="name">{c.name}</div>
                 <div className="meta">{prods.length} produits{toOrder ? ' · 🔴 ' + toOrder + ' à commander' : ''}{low ? ' · 🟠 ' + low + ' faible' : ''}</div>
               </div>
+              {hasValue && <div className="stockval"><div className="n" style={{ fontSize: 15 }}>{formatEuro(value)}</div></div>}
             </div>
           );
         })}
