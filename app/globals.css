@@ -149,4 +149,6 @@ a{color:inherit;text-decoration:none;}
   .print-table th,.print-table td{border:1px solid #ccc;padding:6px 8px;font-size:13px;text-align:left;}
   .print-table th{background:#eee;}
 }
-#print-area{display:none;}
+@media screen{
+  #print-area{display:none;}
+}
