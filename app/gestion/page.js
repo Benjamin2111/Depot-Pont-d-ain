@@ -9,6 +9,7 @@ const TILES = [
   ['/gestion/familles', '🗂️', 'Familles', 'Catégories produits'],
   ['/gestion/chantiers', '🏗️', 'Chantiers', 'Clients & sites'],
   ['/gestion/inventaire', '📋', 'Inventaire', 'Compter le stock'],
+  ['/gestion/etat-stock', '📊', 'État des stocks', 'Export & impression'],
   ['/gestion/qr', '🔳', 'QR codes', 'Générer, imprimer'],
   ['/gestion/utilisateurs', '👥', 'Utilisateurs', 'Ouvriers & responsables']
 ];
