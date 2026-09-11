@@ -7,7 +7,7 @@ import HistoryRow from '../../components/HistoryRow';
 import ProductModal from '../../components/ProductModal';
 import { useData } from '../../lib/DataProvider';
 import { useAuth } from '../../lib/AuthProvider';
-import { statusOf } from '../../lib/helpers';
+import { statusOf, stockValue, formatEuro } from '../../lib/helpers';
 import { supabase } from '../../lib/supabaseClient';
 
 export default function DashboardPage() {
@@ -33,6 +33,8 @@ function DashboardContent() {
   const todaysMv = movements.filter((m) => m.created_at.slice(0, 10) === today);
   const catById = (id) => categories.find((c) => c.id === id);
   const openProduct = products.find((p) => p.id === openProductId);
+  const totalValue = active.reduce((sum, p) => { const v = stockValue(p); return v !== null ? sum + v : sum; }, 0);
+  const hasAnyValue = active.some((p) => stockValue(p) !== null);
 
   async function toggleActive(p) {
     await supabase.from('products').update({ active: p.active === false }).eq('id', p.id);
@@ -46,6 +48,9 @@ function DashboardContent() {
         <div className="stat-card danger"><div className="num">{toOrder.length}</div><div className="lbl">🔴 À commander</div></div>
         <div className="stat-card warn"><div className="num">{low.length}</div><div className="lbl">🟠 Stocks faibles</div></div>
         <div className="stat-card accent"><div className="num">{todaysMv.length}</div><div className="lbl">📊 Mouvements du jour</div></div>
+        {profile.role === 'responsable' && hasAnyValue && (
+          <div className="stat-card"><div className="num" style={{ fontSize: 22 }}>{formatEuro(totalValue)}</div><div className="lbl">💶 Valeur du stock</div></div>
+        )}
       </div>
 
       <button className="btn btn-accent btn-lg btn-block" style={{ marginTop: 18 }} onClick={() => router.push('/sortie')}>➖ Sortie de stock</button>
