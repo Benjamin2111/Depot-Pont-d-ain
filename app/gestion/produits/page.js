@@ -18,7 +18,7 @@ export default function GestionProduitsPage() {
 }
 
 function emptyForm(categories) {
-  return { ref: '', name: '', category_id: categories[0] ? categories[0].id : '', unit: 'pièce', stock: 0, stock_min: 0, stock_secu: 0, stock_max: 0, location: '' };
+  return { ref: '', name: '', category_id: categories[0] ? categories[0].id : '', unit: 'pièce', stock: 0, stock_min: 0, stock_secu: 0, stock_max: 0, location: '', supplier: '', price: '' };
 }
 
 function GestionProduitsContent() {
@@ -37,7 +37,7 @@ function GestionProduitsContent() {
     if (editId) {
       const p = products.find((x) => x.id === editId);
       if (p) {
-        setForm({ ref: p.ref, name: p.name, category_id: p.category_id, unit: p.unit, stock: p.stock, stock_min: p.stock_min, stock_secu: p.stock_secu, stock_max: p.stock_max, location: p.location || '' });
+        setForm({ ref: p.ref, name: p.name, category_id: p.category_id, unit: p.unit, stock: p.stock, stock_min: p.stock_min, stock_secu: p.stock_secu, stock_max: p.stock_max, location: p.location || '', supplier: p.supplier || '', price: (p.price === null || p.price === undefined) ? '' : p.price });
         setShowForm(true);
       }
     }
@@ -55,7 +55,8 @@ function GestionProduitsContent() {
     const payload = {
       ref: form.ref.trim(), name: form.name.trim(), category_id: form.category_id, unit: form.unit.trim(),
       stock: Number(form.stock) || 0, stock_min: Number(form.stock_min) || 0, stock_secu: Number(form.stock_secu) || 0,
-      stock_max: Number(form.stock_max) || 0, location: form.location.trim()
+      stock_max: Number(form.stock_max) || 0, location: form.location.trim(),
+      supplier: form.supplier.trim(), price: form.price === '' ? null : Number(form.price)
     };
     const query = editId
       ? supabase.from('products').update(payload).eq('id', editId)
@@ -101,6 +102,10 @@ function GestionProduitsContent() {
             <div className="form-group"><label>Stock de sécurité</label><input type="number" min="0" required value={form.stock_secu} onChange={(e) => set('stock_secu', e.target.value)} /></div>
           </div>
           <div className="form-group"><label>Stock maximum</label><input type="number" min="0" required value={form.stock_max} onChange={(e) => set('stock_max', e.target.value)} /></div>
+          <div className="form-grid">
+            <div className="form-group"><label>Fournisseur (facultatif)</label><input value={form.supplier} onChange={(e) => set('supplier', e.target.value)} /></div>
+            <div className="form-group"><label>Prix d&apos;achat € (facultatif)</label><input type="number" min="0" step="0.01" value={form.price} onChange={(e) => set('price', e.target.value)} /></div>
+          </div>
           {error && <div className="error-text">{error}</div>}
           <div className="btn-row">
             <button type="button" className="btn btn-outline btn-block" disabled={busy} onClick={() => { setShowForm(false); router.replace('/gestion/produits'); }}>Annuler</button>
