@@ -1,6 +1,6 @@
 'use client';
 import { useRouter } from 'next/navigation';
-import { statusOf, qtyToOrder, qrImageUrl } from '../lib/helpers';
+import { statusOf, qtyToOrder, qrImageUrl, stockValue, formatEuro } from '../lib/helpers';
 
 export default function ProductModal({ product, category, isResponsable, onClose, onEdit, onToggleActive }) {
   const router = useRouter();
@@ -23,6 +23,7 @@ export default function ProductModal({ product, category, isResponsable, onClose
           <StatBlock label="À commander" val={qtyToOrder(product) + ' ' + product.unit} />
           {product.supplier ? <StatBlock label="Fournisseur" val={product.supplier} /> : null}
           {(product.price !== null && product.price !== undefined) ? <StatBlock label="Prix d'achat" val={Number(product.price).toFixed(2) + ' €'} /> : null}
+          {stockValue(product) !== null ? <StatBlock label="Valeur du stock" val={formatEuro(stockValue(product))} /> : null}
         </div>
         <div className="qr-big-wrap"><img src={qrImageUrl(product.id)} alt="QR code" /></div>
         <div className="btn-row" style={{ marginBottom: 10 }}>
