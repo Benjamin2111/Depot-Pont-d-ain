@@ -142,8 +142,11 @@ a{color:inherit;text-decoration:none;}
 @media print{
   body *{visibility:hidden;}
   #print-area, #print-area *{visibility:visible;}
-  #print-area{display:block;position:absolute;top:0;left:0;width:100%;}
+  #print-area{display:block;position:absolute;top:0;left:0;width:100%;padding:20px;}
   .print-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
   .label-tile{break-inside:avoid;}
+  .print-table{width:100%;border-collapse:collapse;margin-bottom:6px;}
+  .print-table th,.print-table td{border:1px solid #ccc;padding:6px 8px;font-size:13px;text-align:left;}
+  .print-table th{background:#eee;}
 }
 #print-area{display:none;}
